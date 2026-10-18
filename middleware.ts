@@ -19,7 +19,20 @@ function isAnalyticsPath(path: string) {
   return pattern.test(path);
 }
 
+// Self-hosted: the app's own host (and Replit preview hosts) must not be
+// treated as a customer custom domain, or every request is sent to papermark.com.
+function isAppHost(host: string) {
+  const hostname = host?.split(":")[0]?.toLowerCase().trim();
+  const appHost = process.env.NEXT_PUBLIC_APP_BASE_HOST?.toLowerCase().trim();
+  return (
+    (!!appHost && hostname === appHost) ||
+    !!hostname?.endsWith(".replit.app") ||
+    !!hostname?.endsWith(".replit.dev")
+  );
+}
+
 function isCustomDomain(host: string) {
+  if (isAppHost(host)) return false;
   return (
     (process.env.NODE_ENV === "development" &&
       (host?.includes(".local") || host?.includes("papermark.dev"))) ||

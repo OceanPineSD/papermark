@@ -49,6 +49,7 @@ export const sendEmail = async ({
 
   const fromAddress =
     from ??
+    process.env.EMAIL_FROM ??
     (marketing
       ? "Marc from Papermark <marc@updates.papermark.com>"
       : system
@@ -65,7 +66,7 @@ export const sendEmail = async ({
         from: fromAddress,
         to: test ? "delivered@resend.dev" : to,
         cc: cc,
-        replyTo: marketing ? "marc@papermark.com" : replyTo,
+        replyTo: marketing && !process.env.EMAIL_FROM ? "marc@papermark.com" : replyTo,
         subject,
         react,
         scheduledAt,

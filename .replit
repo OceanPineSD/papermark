@@ -1,0 +1,15 @@
+modules = ["nodejs-22", "postgresql-16"]
+run = "npm run dev"
+
+[env]
+NODE_OPTIONS = "--max-old-space-size=6144"
+NEXT_TELEMETRY_DISABLED = "1"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["sh", "-c", "npm ci && npx prisma migrate deploy && npm run build"]
+run = ["sh", "-c", "npx next start -p 3000 -H 0.0.0.0"]
+
+[[ports]]
+localPort = 3000
+externalPort = 80

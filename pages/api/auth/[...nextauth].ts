@@ -34,6 +34,18 @@ const getAuthOptions = (req: NextApiRequest): NextAuthOptions => {
     callbacks: {
       ...authOptions.callbacks,
       signIn: async ({ user, account, profile }) => {
+        // Self-hosted: only emails in ALLOWED_SIGNIN_EMAILS (comma-separated)
+        // can create or use an account. Document viewers never sign in here.
+        const allowedEmails = process.env.ALLOWED_SIGNIN_EMAILS?.split(",")
+          .map((e) => e.trim().toLowerCase())
+          .filter(Boolean);
+        if (
+          allowedEmails?.length &&
+          !allowedEmails.includes(user.email?.toLowerCase() ?? "")
+        ) {
+          return false;
+        }
+
         if (!user.email || (await isBlacklistedEmail(user.email))) {
           await identifyUser(user.email ?? user.id);
           await trackAnalytics({
